@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "cc_jira",
+  "project_id": "77ee85ec-4c0d-4aaa-95c6-804fe8897721"
+}
