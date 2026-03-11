@@ -3,6 +3,7 @@
 import json
 from typing import Any, Callable
 
+import click
 from rich.console import Console
 from rich.table import Table
 
@@ -37,6 +38,15 @@ def output(
 ) -> None:
     """Dispatch output to JSON or Rich table rendering."""
     if json_mode:
-        print(json.dumps(data, indent=2, default=str))
+        click.echo(json.dumps(data, indent=2, default=str))
     elif table_fn is not None:
         table_fn(data)
+
+
+class TrakSystemError(click.ClickException):
+    """System-level error (exit code 2)."""
+
+    exit_code = 2
+
+    def format_message(self) -> str:
+        return f"System error: {self.message}"

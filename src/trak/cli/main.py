@@ -1,6 +1,7 @@
 """CLI entry point for trak."""
 
 import json
+import sqlite3
 from pathlib import Path
 
 import click
@@ -10,10 +11,25 @@ from trak.cli.issue import issue
 from trak.cli.project import project
 from trak.cli.search import search
 from trak.cli.workflow import workflow
+from trak.core.formatting import TrakSystemError
 from trak.db.schema import init_db
 
 
-@click.group()
+class TrakGroup(click.Group):
+    """Custom Click group that catches system errors."""
+
+    def invoke(self, ctx: click.Context) -> None:
+        try:
+            return super().invoke(ctx)
+        except click.exceptions.Exit:
+            raise
+        except click.ClickException:
+            raise
+        except (sqlite3.OperationalError, OSError) as e:
+            raise TrakSystemError(str(e))
+
+
+@click.group(cls=TrakGroup)
 @click.option("--json", "use_json", is_flag=True, help="Output in JSON format.")
 @click.pass_context
 def cli(ctx: click.Context, use_json: bool) -> None:
