@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 
+from trak.cli.project import project
 from trak.db.schema import init_db
 
 
@@ -15,6 +16,9 @@ def cli(ctx: click.Context, use_json: bool) -> None:
     """trak — a local-first issue tracker."""
     ctx.ensure_object(dict)
     ctx.obj["json"] = use_json
+
+
+cli.add_command(project)
 
 
 @cli.command()
