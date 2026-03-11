@@ -130,7 +130,7 @@ def issue_update(ctx, key, status, assignee, priority, summary, issue_type, labe
             type=issue_type,
             labels=labels,
         )
-    except KeyError as e:
+    except (KeyError, ValueError) as e:
         raise click.ClickException(str(e))
 
     output(

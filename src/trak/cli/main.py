@@ -8,6 +8,7 @@ import click
 from trak.cli.issue import issue
 from trak.cli.project import project
 from trak.cli.search import search
+from trak.cli.workflow import workflow
 from trak.db.schema import init_db
 
 
@@ -23,6 +24,7 @@ def cli(ctx: click.Context, use_json: bool) -> None:
 cli.add_command(project)
 cli.add_command(issue)
 cli.add_command(search)
+cli.add_command(workflow)
 
 
 @cli.command()
