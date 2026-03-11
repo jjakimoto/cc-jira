@@ -1,6 +1,13 @@
 
 .worktree
 
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+.pytest_cache/
+
 # Dolt database files (added by bd init)
 .dolt/
 *.db
