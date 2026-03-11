@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS issues (
     type TEXT NOT NULL DEFAULT 'task',
     summary TEXT NOT NULL,
     description TEXT,
-    status TEXT NOT NULL DEFAULT 'open',
+    status TEXT NOT NULL DEFAULT 'todo',
     priority TEXT NOT NULL DEFAULT 'p2',
     assignee TEXT,
     labels TEXT,
