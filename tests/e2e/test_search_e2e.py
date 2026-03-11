@@ -56,7 +56,7 @@ def _setup_test_data(runner):
     # Update issue 2 status to in_progress
     runner.invoke(cli, ["issue", "update", "MP-2", "--status", "in_progress"])
 
-    # Issue 4: in_progress bug, p1, no assignee, label=frontend
+    # Issue 4: done bug, p1, no assignee, label=frontend
     runner.invoke(
         cli,
         [
@@ -67,8 +67,10 @@ def _setup_test_data(runner):
             "--labels", "frontend",
         ],
     )
-    # Update status to in_progress (valid transition from todo)
+    # Transition through valid chain: todo → in_progress → in_review → done
     runner.invoke(cli, ["issue", "update", "MP-4", "--status", "in_progress"])
+    runner.invoke(cli, ["issue", "update", "MP-4", "--status", "in_review"])
+    runner.invoke(cli, ["issue", "update", "MP-4", "--status", "done"])
 
     # Issue 5: todo task, p3, assigned to bob, no labels
     runner.invoke(
