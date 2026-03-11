@@ -11,7 +11,7 @@ def _setup_test_data(runner):
     """Create a project and several issues with varying attributes for search tests."""
     runner.invoke(cli, ["project", "create", "My Project", "--key", "MP"])
 
-    # Issue 1: open bug, p0, assigned to tom, label=backend
+    # Issue 1: todo bug, p0, assigned to tom, label=backend
     runner.invoke(
         cli,
         [
@@ -39,7 +39,7 @@ def _setup_test_data(runner):
         ],
     )
 
-    # Issue 3: open story, p2, assigned to tom, label=backend,api
+    # Issue 3: todo story, p2, assigned to tom, label=backend,api
     runner.invoke(
         cli,
         [
@@ -56,7 +56,7 @@ def _setup_test_data(runner):
     # Update issue 2 status to in_progress
     runner.invoke(cli, ["issue", "update", "MP-2", "--status", "in_progress"])
 
-    # Issue 4: resolved bug, p1, no assignee, label=frontend
+    # Issue 4: in_progress bug, p1, no assignee, label=frontend
     runner.invoke(
         cli,
         [
@@ -67,10 +67,10 @@ def _setup_test_data(runner):
             "--labels", "frontend",
         ],
     )
-    # Update status to resolved
-    runner.invoke(cli, ["issue", "update", "MP-4", "--status", "resolved"])
+    # Update status to in_progress (valid transition from todo)
+    runner.invoke(cli, ["issue", "update", "MP-4", "--status", "in_progress"])
 
-    # Issue 5: open task, p3, assigned to bob, no labels
+    # Issue 5: todo task, p3, assigned to bob, no labels
     runner.invoke(
         cli,
         [
@@ -84,16 +84,16 @@ def _setup_test_data(runner):
 
 
 def test_search_status_filter(initialized_project):
-    """trak search "status:open" returns only open issues."""
+    """trak search "status:todo" returns only todo issues."""
     runner = CliRunner()
     _setup_test_data(runner)
 
-    result = runner.invoke(cli, ["--json", "search", "status:open"])
+    result = runner.invoke(cli, ["--json", "search", "status:todo"])
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert len(data) == 3
     for issue in data:
-        assert issue["status"] == "open"
+        assert issue["status"] == "todo"
 
 
 def test_search_priority_comma_or(initialized_project):
@@ -110,16 +110,16 @@ def test_search_priority_comma_or(initialized_project):
 
 
 def test_search_combined_filters(initialized_project):
-    """trak search "type:bug status:open" combines filters with AND."""
+    """trak search "type:bug status:todo" combines filters with AND."""
     runner = CliRunner()
     _setup_test_data(runner)
 
-    result = runner.invoke(cli, ["--json", "search", "type:bug status:open"])
+    result = runner.invoke(cli, ["--json", "search", "type:bug status:todo"])
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert len(data) == 1
     assert data[0]["type"] == "bug"
-    assert data[0]["status"] == "open"
+    assert data[0]["status"] == "todo"
     assert data[0]["summary"] == "Fix login bug"
 
 
@@ -202,11 +202,11 @@ def test_search_no_results(initialized_project):
 
 
 def test_search_json_output(initialized_project):
-    """trak --json search "status:open" returns valid JSON array with expected keys."""
+    """trak --json search "status:todo" returns valid JSON array with expected keys."""
     runner = CliRunner()
     _setup_test_data(runner)
 
-    result = runner.invoke(cli, ["--json", "search", "status:open"])
+    result = runner.invoke(cli, ["--json", "search", "status:todo"])
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert isinstance(data, list)
