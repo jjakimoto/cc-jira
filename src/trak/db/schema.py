@@ -55,6 +55,13 @@ CREATE TABLE IF NOT EXISTS workflow_transitions (
     to_status TEXT NOT NULL,
     UNIQUE(workflow_name, from_status, to_status)
 );
+
+CREATE TABLE IF NOT EXISTS config (
+    id INTEGER PRIMARY KEY,
+    key TEXT UNIQUE NOT NULL,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 """
 
 _DEFAULT_WORKFLOW = [
