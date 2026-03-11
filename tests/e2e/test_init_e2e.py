@@ -32,18 +32,19 @@ def test_init_creates_all_tables(initialized_project):
 
 
 def test_init_seeds_default_workflow(initialized_project):
-    """Default workflow has 4 statuses after init."""
+    """Default workflow has 5 statuses after init."""
     db_path = initialized_project / ".trak" / "trak.db"
     conn = sqlite3.connect(str(db_path))
     rows = conn.execute(
         "SELECT status, position, is_default FROM workflows WHERE name='default' ORDER BY position"
     ).fetchall()
     conn.close()
-    assert len(rows) == 4
-    assert rows[0] == ("open", 0, 1)
+    assert len(rows) == 5
+    assert rows[0] == ("todo", 0, 1)
     assert rows[1] == ("in_progress", 1, 0)
-    assert rows[2] == ("resolved", 2, 0)
-    assert rows[3] == ("closed", 3, 0)
+    assert rows[2] == ("in_review", 2, 0)
+    assert rows[3] == ("done", 3, 0)
+    assert rows[4] == ("cancelled", 4, 0)
 
 
 def test_init_already_initialized(initialized_project):

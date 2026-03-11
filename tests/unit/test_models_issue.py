@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from trak.db.schema import create_tables, seed_default_workflow
+from trak.db.schema import create_tables, seed_default_transitions, seed_default_workflow
 from trak.models.comment import Comment
 from trak.models.issue import Issue
 from trak.models.project import Project
@@ -19,6 +19,7 @@ def db_conn():
     conn.execute("PRAGMA foreign_keys=ON")
     create_tables(conn)
     seed_default_workflow(conn)
+    seed_default_transitions(conn)
     conn.commit()
     yield conn
     conn.close()
@@ -46,7 +47,7 @@ def test_create_returns_correct_fields(db_conn, project_mp):
     assert issue.number == 1
     assert issue.summary == "Fix bug"
     assert issue.type == "task"
-    assert issue.status == "open"
+    assert issue.status == "todo"
     assert issue.priority == "p2"
     assert issue.description is None
     assert issue.assignee is None

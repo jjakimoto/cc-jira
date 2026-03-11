@@ -4,6 +4,8 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+from trak.models.workflow import Workflow
+
 
 @dataclass
 class Issue:
@@ -51,7 +53,7 @@ class Issue:
         cursor = conn.execute(
             "INSERT INTO issues (project_id, number, type, summary, description, "
             "status, priority, assignee, labels, created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, 'todo', ?, ?, ?, ?, ?)",
             (project_id, next_number, type, summary, description, priority, assignee, labels, now, now),
         )
         conn.commit()
@@ -62,7 +64,7 @@ class Issue:
             type=type,
             summary=summary,
             description=description,
-            status="open",
+            status="todo",
             priority=priority,
             assignee=assignee,
             labels=labels,
@@ -164,6 +166,7 @@ class Issue:
         updates: list[str] = []
         params: list = []
         if status is not None:
+            Workflow.validate_transition(conn, issue.status, status)
             updates.append("status = ?")
             params.append(status)
         if assignee is not None:
