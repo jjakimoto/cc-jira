@@ -1,6 +1,6 @@
 """Workflow management CLI commands."""
 
-import json as json_mod
+import json as json_lib
 
 import click
 
@@ -26,7 +26,10 @@ def workflow_list(ctx):
         data,
         ctx.obj["json"],
         table_fn=lambda d: render_table(
-            columns=[("Name", "name"), ("Statuses", "statuses")],
+            columns=[
+                ("Name", "name"),
+                ("Statuses", "statuses"),
+            ],
             rows=[{"name": w["name"], "statuses": ", ".join(w["statuses"])} for w in d],
             title="Workflows",
         ),
@@ -43,10 +46,8 @@ def workflow_show(ctx, name):
     if wf is None:
         raise click.ClickException(f"Workflow '{name}' not found.")
 
-    data = wf.to_dict()
-
     output(
-        data,
+        wf.to_dict(),
         ctx.obj["json"],
         table_fn=lambda d: _print_workflow_detail(d),
     )
@@ -54,18 +55,19 @@ def workflow_show(ctx, name):
 
 @workflow.command("create")
 @click.argument("name")
-@click.option("--statuses", required=True, help="Comma-separated status names.")
-@click.option("--transitions", required=True, help="JSON mapping of from_status to list of to_statuses.")
+@click.option("--statuses", required=True, help="Comma-separated list of statuses.")
+@click.option("--transitions", required=True, help="JSON string of transitions map.")
 @click.pass_context
 def workflow_create(ctx, name, statuses, transitions):
     """Create a custom workflow."""
-    conn = get_connection()
     status_list = [s.strip() for s in statuses.split(",")]
+
     try:
-        transitions_dict = json_mod.loads(transitions)
-    except json_mod.JSONDecodeError as e:
+        transitions_dict = json_lib.loads(transitions)
+    except json_lib.JSONDecodeError as e:
         raise click.ClickException(f"Invalid JSON for transitions: {e}")
 
+    conn = get_connection()
     try:
         wf = Workflow.create(conn, name=name, statuses=status_list, transitions=transitions_dict)
     except ValueError as e:
@@ -74,15 +76,27 @@ def workflow_create(ctx, name, statuses, transitions):
     output(
         wf.to_dict(),
         ctx.obj["json"],
-        table_fn=lambda d: click.echo(f"Created workflow '{name}'."),
+        table_fn=lambda d: _print_workflow_detail(d),
     )
 
 
 def _print_workflow_detail(data: dict) -> None:
     """Print workflow statuses and transitions."""
     click.echo(f"Workflow: {data['name']}")
-    click.echo(f"Statuses: {', '.join(data['statuses'])}")
-    click.echo("Transitions:")
-    for from_s, to_list in data.get("transitions", {}).items():
+    click.echo()
+    render_table(
+        columns=[("Position", "position"), ("Status", "status")],
+        rows=[{"position": str(i), "status": s} for i, s in enumerate(data["statuses"])],
+        title="Statuses",
+    )
+    click.echo()
+    transitions = data.get("transitions", {})
+    trans_rows = []
+    for from_s, to_list in sorted(transitions.items()):
         for to_s in to_list:
-            click.echo(f"  {from_s} -> {to_s}")
+            trans_rows.append({"from": from_s, "to": to_s})
+    render_table(
+        columns=[("From", "from"), ("To", "to")],
+        rows=trans_rows,
+        title="Transitions",
+    )
